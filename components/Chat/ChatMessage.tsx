@@ -139,7 +139,7 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
           {message.role === 'assistant' ? (
             <Babou size={30} />
           ) : (
-            <Babou size={30} />
+            <IconUser size={30} />
           )}
         </div>
 
