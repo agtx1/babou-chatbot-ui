@@ -1,16 +1,10 @@
 import React from 'react';
 
-interface BabouProps {
-  size?: number;
-  color?: string;
-  [key: string]: any;  // for restProps
-}
-
 export function Babou({
   size = 30,
   color = 'currentColor',
   ...restProps
-}): React.FC<BabouProps> {
+}) {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
