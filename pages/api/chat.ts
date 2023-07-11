@@ -12,6 +12,7 @@ import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 
 export const config = {
   runtime: 'edge',
+  unstable_allowDynamic: ['node_modules/underscore/modules/template.js','node_modules/underscore/modules/_setup.js']
 };
 
 const handler = async (req: Request): Promise<Response> => {
