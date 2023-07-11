@@ -10,6 +10,7 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
+    config.unstable_allowDynamic = ['node_modules/underscore/modules/template.js','node_modules/underscore/modules/_setup.js'];
 
     return config;
   },

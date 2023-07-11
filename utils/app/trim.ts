@@ -1,9 +1,6 @@
 import {WordTokenizer,Stemmer,PorterStemmer,LancasterStemmer} from 'natural';
 import * as stopwords from 'stopword';
-export const config = {
-    runtime: 'edge',
-    unstable_allowDynamic: ['node_modules/underscore/modules/template.js','node_modules/underscore/modules/_setup.js']
-  };
+
 // Define constants
 const PUNCTUATION: string[] = [".", ",", "'", '"', "!", "?", ";", ":", "-"];
 
