@@ -1,6 +1,5 @@
 import {WordTokenizer,Stemmer,PorterStemmer,LancasterStemmer} from 'natural';
 import * as stopwords from 'stopword';
-import {union} from 'lodash';
 
 // Define constants
 const PUNCTUATION: string[] = [".", ",", "'", '"', "!", "?", ";", ":", "-"];
@@ -80,7 +79,9 @@ export function trim(
     // Remove stopwords if required
     if (removeStopwords) {
         const nltkStopwords = stopwords[language];
-        wordsToExclude = union(nltkStopwords, ARTICLES_PREPOSITIONS[language]).filter(word => !NEGATION_WORDS[language].includes(word));
+        const combined = [...nltkStopwords, ...ARTICLES_PREPOSITIONS[language]];
+        const uniqueWords = Array.from(new Set(combined));
+        wordsToExclude = uniqueWords.filter(word => !NEGATION_WORDS[language].includes(word));
         tokenized = stopwords.removeStopwords(tokenized, wordsToExclude);
     }
 
