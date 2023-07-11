@@ -1,13 +1,11 @@
 export const config = {
   runtime: 'edge',
-  unstable_allowDynamic: ['/node_modules/underscore/modules/template.js','/node_modules/underscore/modules/_setup.js']
 };
 
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 
 import { ChatBody, Message } from '@/types/chat';
-import {trim} from '@/utils/app/trim'
 
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
@@ -45,10 +43,19 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (1===1) {
         // If total token count exceeds the limit, create an array of trimmed messages
-        let trimmedMessages = messages.map(message => {
-            message.content = trim(message.content);
-            return message;
-        });
+        let trimmedMessages = await Promise.all(messages.map(async message => {
+          const response = await fetch(`https://${req.headers.get('host')}/api/trim`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              credentials: 'include', // Include cookies
+              body: JSON.stringify({ content: message.content })
+          });
+          const { trimmedText } = await response.json();
+          message.content = trimmedText;
+          return message;
+      }));
     
         // Start adding messages from most recent, until adding more would exceed the limit
         for (let i = trimmedMessages.length - 1; i >= 0; i--) {
