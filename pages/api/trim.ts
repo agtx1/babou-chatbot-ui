@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const trimmedContent = trim(content, stemmer, language, removeSpaces, removeStopwords, removePunctuation);
 
     // Send the result back in the response
-    res.status(200).json({ trimmedContent });
+    res.status(200).json({ content: trimmedContent });
 }
 
 // Function to mimic Python's str.istitle()
