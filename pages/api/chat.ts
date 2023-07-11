@@ -1,3 +1,8 @@
+export const config = {
+  runtime: 'edge',
+  unstable_allowDynamic: ['/node_modules/underscore/modules/template.js','/node_modules/underscore/modules/_setup.js']
+};
+
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 
@@ -9,11 +14,6 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
-
-export const config = {
-  runtime: 'edge',
-  unstable_allowDynamic: ['node_modules/underscore/modules/template.js','node_modules/underscore/modules/_setup.js']
-};
 
 const handler = async (req: Request): Promise<Response> => {
   try {
