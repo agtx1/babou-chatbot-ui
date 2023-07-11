@@ -1,7 +1,7 @@
 import React from 'react';
 
 export function Babou({
-  size = 30,
+  size = '2.5em',
   color = 'currentColor',
   ...restProps
 }) {
