@@ -1,7 +1,3 @@
-export const config = {
-  runtime: 'edge',
-};
-
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 
@@ -12,7 +8,10 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
-import { trim } from '@/utils/app/trim';
+
+export const config = {
+  runtime: 'edge',
+};
 
 const handler = async (req: Request): Promise<Response> => {
   try {
@@ -38,47 +37,18 @@ const handler = async (req: Request): Promise<Response> => {
     const prompt_tokens = encoding.encode(promptToSend);
 
     let tokenCount = prompt_tokens.length;
-    let totalTokenCount = messages.reduce((count, message) => count + encoding.encode(message.content).length, 0) + tokenCount;
-
     let messagesToSend: Message[] = [];
-    if (messages.length>0){
-      let lastMessage = messages.pop() as Message;
-    
-      if (1===1) {
-          // If total token count exceeds the limit, create an array of trimmed messages
-          let trimmedMessages = await Promise.all(messages.map(async message => {
-            const response = await fetch(`http://${req.headers.get('host')}/api/trim`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include', // Include cookies
-                body: JSON.stringify({ content: message.content })
-            });
-            const responseData = await response.json();
-            message.content = responseData.content;
-            return message;
-            
-        }));
 
-        trimmedMessages.push(lastMessage);
-      
-          // Start adding messages from most recent, until adding more would exceed the limit
-          for (let i = trimmedMessages.length - 1; i >= 0; i--) {
-              let tokens = encoding.encode(trimmedMessages[i].content);
-              if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
-                  break;
-              }
-              tokenCount += tokens.length;
-              messagesToSend = [trimmedMessages[i], ...messagesToSend];
-          }
-      } else {
-          // If total token count doesn't exceed the limit, use the original messages
-          messagesToSend = messages;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      const tokens = encoding.encode(message.content);
+
+      if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
+        break;
       }
+      tokenCount += tokens.length;
+      messagesToSend = [message, ...messagesToSend];
     }
-
-
 
     encoding.free();
 
