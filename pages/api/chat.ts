@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
         try{
           // If total token count exceeds the limit, create an array of trimmed messages
           const trimmedMessages =    await Promise.all(messagesToProcess.map(async message => {
-                const response = await fetch(`https://${req.headers.get('host')}/api/trim`, {
+                const response = await fetch(`http://localhost:3000/api/trim`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -65,10 +65,13 @@ const handler = async (req: Request): Promise<Response> => {
             promptToSend += "\n\nSome messages may be compressed, which should not affect the output.";
         }
         catch(err){
+          console.warn("Trim API error");
+          console.warn(err);
           messagesToProcess = [];
           messagesToProcess.push(...messages);
         }
       }
+
 
       // Start adding messages from most recent, until adding more would exceed the limit
       for (let i = messagesToProcess.length - 1; i >= 0; i--) {
