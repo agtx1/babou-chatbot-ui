@@ -22,7 +22,7 @@ export const CompressionToggle: FC<Props> = ({
   const { t } = useTranslation('chat');
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value === 'enabled';
+    const newValue = event.target.id === 'enableCompression';
     setIsEnabled(newValue);
     onToggleCompression(newValue);
   };
