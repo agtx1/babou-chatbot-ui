@@ -31,21 +31,29 @@ export const CompressionToggle: FC<Props> = ({
     <div className="flex flex-col">
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">{label}</label>
       <span className="text-[12px] text-black/50 dark:text-white/50 text-sm">{t('Conversation compression allows ChatGPT to remember more in a single conversation by compressing previous messages. Compression is not good for non-English text or code.')}</span>
-      <div className="mt-2">
-        <input
-          type="radio"
-          name="compressionToggle"
-          value="enabled"
-          checked={isEnabled}
-          onChange={handleToggle}
-        /> Enable
-        <input
-          type="radio"
-          name="compressionToggle"
-          value="disabled"
-          checked={!isEnabled}
-          onChange={handleToggle}
-        /> Disable
+      <div className="mt-2 space-y-2">
+        <div>
+          <input
+            type="radio"
+            id="enableCompression"
+            name="compressionToggle"
+            value="enabled"
+            checked={isEnabled}
+            onChange={handleToggle}
+          />
+          <label htmlFor="enableCompression" className="ml-2">{t('Enable chat compression')}</label>
+        </div>
+        <div>
+          <input
+            type="radio"
+            id="disableCompression"
+            name="compressionToggle"
+            value="disabled"
+            checked={!isEnabled}
+            onChange={handleToggle}
+          />
+          <label htmlFor="disableCompression" className="ml-2">{t('Disable chat compression')}</label>
+        </div>
       </div>
     </div>
   );

@@ -48,13 +48,13 @@ const handler = async (req: Request): Promise<Response> => {
         try{
           // If total token count exceeds the limit, create an array of trimmed messages
           const trimmedMessages =    await Promise.all(messagesToProcess.map(async message => {
-                const response = await fetch(`http://${req.headers.get('host')}/api/trim`, {
+                const response = await fetch(`https://${req.headers.get('host')}/api/trim`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     credentials: 'include', // Include cookies
-                    body: JSON.stringify({ content: message.content })
+                    body: JSON.stringify({ content: message.content, removeSpaces: false, stemmer: "porter" })
                 });
                 const responseData = await response.json();
                 message.content = responseData.content;
@@ -62,6 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
                 
             }));
             messagesToProcess = [...trimmedMessages, lastMessage];
+            promptToSend += "\n\nSome messages may be compressed, which should not affect the output.";
         }
         catch(err){
           messagesToProcess = [];
