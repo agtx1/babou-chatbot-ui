@@ -194,6 +194,7 @@ const Home = ({
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
       folderId: null,
+      compressionEnabled: false,
     };
 
     const updatedConversations = [...conversations, newConversation];
