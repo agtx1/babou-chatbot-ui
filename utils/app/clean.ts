@@ -49,6 +49,13 @@ export const cleanSelectedConversation = (conversation: Conversation) => {
     };
   }
 
+  if (typeof updatedConversation.compressionEnabled !== 'boolean'){
+    updatedConversation = {
+      ...updatedConversation,
+      compressionEnabled: false,
+    };
+  }
+
   return updatedConversation;
 };
 
@@ -84,6 +91,10 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
 
       if (!conversation.messages) {
         conversation.messages = [];
+      }
+
+      if (typeof conversation.compressionEnabled !== 'boolean'){
+        conversation.compressionEnabled = false;
       }
 
       acc.push(conversation);

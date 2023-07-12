@@ -33,6 +33,7 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
+import { CompressionToggle } from './Compression';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -433,6 +434,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           })
                         }
                       />
+
+                      <CompressionToggle
+                          label={t('Compression')}
+                          onToggleCompression={(isEnabled) =>
+                            handleUpdateConversation(selectedConversation, {
+                              key: 'compressionEnabled',
+                              value: isEnabled,
+                            })
+                          }
+                        />
                     </div>
                   )}
                 </div>
