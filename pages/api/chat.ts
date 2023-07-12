@@ -12,11 +12,10 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
-import { trim } from '@/utils/app/trim';
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
+    const { model, messages, prompt, key, temperature, compressionEnabled } = (await req.json()) as ChatBody;
 
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
@@ -38,47 +37,49 @@ const handler = async (req: Request): Promise<Response> => {
     const prompt_tokens = encoding.encode(promptToSend);
 
     let tokenCount = prompt_tokens.length;
-    let totalTokenCount = messages.reduce((count, message) => count + encoding.encode(message.content).length, 0) + tokenCount;
 
+    let messagesToProcess: Message[] = [...messages];
     let messagesToSend: Message[] = [];
-    if (messages.length>0){
-      let lastMessage = messages.pop() as Message;
+    if (messagesToProcess.length>0){
+
+      if (compressionEnabled){
+        let lastMessage = messagesToProcess.pop() as Message;
     
-      if (1===1) {
+        try{
           // If total token count exceeds the limit, create an array of trimmed messages
-          let trimmedMessages = await Promise.all(messages.map(async message => {
-            const response = await fetch(`http://${req.headers.get('host')}/api/trim`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include', // Include cookies
-                body: JSON.stringify({ content: message.content })
-            });
-            const responseData = await response.json();
-            message.content = responseData.content;
-            return message;
-            
-        }));
-
-        trimmedMessages.push(lastMessage);
-      
-          // Start adding messages from most recent, until adding more would exceed the limit
-          for (let i = trimmedMessages.length - 1; i >= 0; i--) {
-              let tokens = encoding.encode(trimmedMessages[i].content);
-              if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
-                  break;
-              }
-              tokenCount += tokens.length;
-              messagesToSend = [trimmedMessages[i], ...messagesToSend];
-          }
-      } else {
-          // If total token count doesn't exceed the limit, use the original messages
-          messagesToSend = messages;
+          const trimmedMessages =    await Promise.all(messagesToProcess.map(async message => {
+                const response = await fetch(`http://${req.headers.get('host')}/api/trim`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Include cookies
+                    body: JSON.stringify({ content: message.content })
+                });
+                const responseData = await response.json();
+                message.content = responseData.content;
+                return message;
+                
+            }));
+            messagesToProcess = [...trimmedMessages, lastMessage];
+        }
+        catch(err){
+          messagesToProcess = [];
+          messagesToProcess.push(...messages);
+        }
       }
+
+      // Start adding messages from most recent, until adding more would exceed the limit
+      for (let i = messagesToProcess.length - 1; i >= 0; i--) {
+          let tokens = encoding.encode(messagesToProcess[i].content);
+          if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
+              break;
+          }
+          tokenCount += tokens.length;
+          messagesToSend = [messagesToProcess[i], ...messagesToSend];
+        }
+  
     }
-
-
 
     encoding.free();
 
