@@ -30,8 +30,8 @@ export const CompressionToggle: FC<Props> = ({
   return (
     <div className="flex flex-col">
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">{label}</label>
-      <span className="text-[12px] text-black/50 dark:text-white/50 text-sm">{t('Conversation compression allows ChatGPT to remember more in a single conversation by compressing previous messages. Compression is not good for non-English text or code.')}</span>
-      <div className="mt-2 space-y-2">
+      <span className="text-[12px] text-black/50 dark:text-white/50 text-sm">{t('Conversation compression allows ChatGPT to remember more in a conversation. Does not work for code or non-English text.')}</span>
+      <div className="mt-2 flex space-x-4">
         <div>
           <input
             type="radio"
