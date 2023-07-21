@@ -11,6 +11,7 @@ import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 
 import { cleanConversationHistory } from './clean';
+import { AppStorage } from './storage';
 
 export function isExportFormatV1(obj: any): obj is ExportFormatV1 {
   return Array.isArray(obj);
@@ -72,9 +73,9 @@ function currentDate() {
 }
 
 export const exportData = () => {
-  let history = localStorage.getItem('conversationHistory');
-  let folders = localStorage.getItem('folders');
-  let prompts = localStorage.getItem('prompts');
+  let history = AppStorage.getItem('conversationHistory');
+  let folders = AppStorage.getItem('folders');
+  let prompts = AppStorage.getItem('prompts');
 
   if (history) {
     history = JSON.parse(history);
@@ -114,7 +115,7 @@ export const importData = (
 ): LatestExportFormat => {
   const { history, folders, prompts } = cleanData(data);
 
-  const oldConversations = localStorage.getItem('conversationHistory');
+  const oldConversations = AppStorage.getItem('conversationHistory');
   const oldConversationsParsed = oldConversations
     ? JSON.parse(oldConversations)
     : [];
@@ -126,17 +127,17 @@ export const importData = (
     (conversation, index, self) =>
       index === self.findIndex((c) => c.id === conversation.id),
   );
-  localStorage.setItem('conversationHistory', JSON.stringify(newHistory));
+  AppStorage.setItem('conversationHistory', JSON.stringify(newHistory));
   if (newHistory.length > 0) {
-    localStorage.setItem(
+    AppStorage.setItem(
       'selectedConversation',
       JSON.stringify(newHistory[newHistory.length - 1]),
     );
   } else {
-    localStorage.removeItem('selectedConversation');
+    AppStorage.removeItem('selectedConversation');
   }
 
-  const oldFolders = localStorage.getItem('folders');
+  const oldFolders = AppStorage.getItem('folders');
   const oldFoldersParsed = oldFolders ? JSON.parse(oldFolders) : [];
   const newFolders: FolderInterface[] = [
     ...oldFoldersParsed,
@@ -145,15 +146,15 @@ export const importData = (
     (folder, index, self) =>
       index === self.findIndex((f) => f.id === folder.id),
   );
-  localStorage.setItem('folders', JSON.stringify(newFolders));
+  AppStorage.setItem('folders', JSON.stringify(newFolders));
 
-  const oldPrompts = localStorage.getItem('prompts');
+  const oldPrompts = AppStorage.getItem('prompts');
   const oldPromptsParsed = oldPrompts ? JSON.parse(oldPrompts) : [];
   const newPrompts: Prompt[] = [...oldPromptsParsed, ...prompts].filter(
     (prompt, index, self) =>
       index === self.findIndex((p) => p.id === prompt.id),
   );
-  localStorage.setItem('prompts', JSON.stringify(newPrompts));
+  AppStorage.setItem('prompts', JSON.stringify(newPrompts));
 
   return {
     version: 4,

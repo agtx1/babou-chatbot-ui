@@ -1,5 +1,6 @@
 import { FolderInterface } from '@/types/folder';
+import { AppStorage } from './storage';
 
 export const saveFolders = (folders: FolderInterface[]) => {
-  localStorage.setItem('folders', JSON.stringify(folders));
+  AppStorage.setItem('folders', JSON.stringify(folders));
 };

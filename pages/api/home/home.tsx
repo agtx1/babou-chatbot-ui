@@ -39,7 +39,8 @@ import Promptbar from '@/components/Promptbar';
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v4 } from 'uuid';
+import { AppStorage } from '@/utils/app/storage';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -252,6 +253,7 @@ const Home = ({
   // ON LOAD --------------------------------------------
 
   useEffect(() => {
+
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
@@ -260,20 +262,20 @@ const Home = ({
       });
     }
 
-    const apiKey = localStorage.getItem('apiKey');
+    const apiKey = AppStorage.getItem('apiKey');
 
     if (serverSideApiKeyIsSet) {
       dispatch({ field: 'apiKey', value: '' });
 
-      localStorage.removeItem('apiKey');
+      AppStorage.removeItem('apiKey');
     } else if (apiKey) {
       dispatch({ field: 'apiKey', value: apiKey });
     }
 
-    const pluginKeys = localStorage.getItem('pluginKeys');
+    const pluginKeys = AppStorage.getItem('pluginKeys');
     if (serverSidePluginKeysSet) {
       dispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
+      AppStorage.removeItem('pluginKeys');
     } else if (pluginKeys) {
       dispatch({ field: 'pluginKeys', value: pluginKeys });
     }
@@ -283,27 +285,27 @@ const Home = ({
       dispatch({ field: 'showPromptbar', value: false });
     }
 
-    const showChatbar = localStorage.getItem('showChatbar');
+    const showChatbar = AppStorage.getItem('showChatbar');
     if (showChatbar) {
       dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
     }
 
-    const showPromptbar = localStorage.getItem('showPromptbar');
+    const showPromptbar = AppStorage.getItem('showPromptbar');
     if (showPromptbar) {
       dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
 
-    const folders = localStorage.getItem('folders');
+    const folders = AppStorage.getItem('folders');
     if (folders) {
       dispatch({ field: 'folders', value: JSON.parse(folders) });
     }
 
-    const prompts = localStorage.getItem('prompts');
+    const prompts = AppStorage.getItem('prompts');
     if (prompts) {
       dispatch({ field: 'prompts', value: JSON.parse(prompts) });
     }
 
-    const conversationHistory = localStorage.getItem('conversationHistory');
+    const conversationHistory = AppStorage.getItem('conversationHistory');
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
         JSON.parse(conversationHistory);
@@ -314,7 +316,7 @@ const Home = ({
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
     }
 
-    const selectedConversation = localStorage.getItem('selectedConversation');
+    const selectedConversation = AppStorage.getItem('selectedConversation');
     if (selectedConversation) {
       const parsedSelectedConversation: Conversation =
         JSON.parse(selectedConversation);

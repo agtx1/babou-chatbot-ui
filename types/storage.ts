@@ -2,9 +2,10 @@ import { Conversation } from './chat';
 import { FolderInterface } from './folder';
 import { PluginKey } from './plugin';
 import { Prompt } from './prompt';
+import { Settings } from './settings';
 
 // keep track of local storage schema
-export interface LocalStorage {
+export interface StorageSchema {
   apiKey: string;
   conversationHistory: Conversation[];
   selectedConversation: Conversation;
@@ -18,4 +19,7 @@ export interface LocalStorage {
   showPromptbar: boolean;
   // added plugin keys (4/3/23)
   pluginKeys: PluginKey[];
+  settings: Settings;
 }
+
+export const RemoteStorageKeys: Array<keyof StorageSchema> = ['conversationHistory', 'folders', 'prompts'];
