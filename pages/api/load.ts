@@ -1,4 +1,4 @@
-import { RemoteStorageKeys } from "@/types/storage";
+import { RemoteStorageItems } from "@/types/storage";
 import { getData } from "@/utils/server/storage";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userId = '' //implement
 
     try{
-        const data = await getData(userId,RemoteStorageKeys);
+        const data = await getData(userId,RemoteStorageItems);
         res.json(data);
     }
     catch{

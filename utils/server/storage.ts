@@ -1,50 +1,95 @@
-import { getFirestore, doc, setDoc, collection, query, where  } from "firebase/firestore";
+import {getDatabase} from 'firebase-admin/database';
 
-import { initializeApp } from "firebase/app";
-import { StorageSchema } from "@/types/storage";
-import crypto from 'crypto';
-import { KeyValuePair } from "@/types/data";
-
-const firebaseConfig = {
-    //
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+import { initializeApp } from "firebase-admin/app";
+import { EncryptedStoredObject, StorageKey, StorageSchema, encryptedStoredObjectSchema, storageKeySchema } from "@/types/storage";
+import Ajv from 'ajv';
 
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
-const userId = ""; // implement
+const ajv = new Ajv();
+const firebaseApp = initializeApp();
+const db = getDatabase(firebaseApp);
 
-const userDataRef = collection(db, `userData/${userId}`);
 
 // Function to store data
-export const storeData = (userId: string, key: keyof StorageSchema, data: string) => {
-    const hash = crypto.createHash('sha256').update(data).digest('base64');
+const storeData = (userId: string, value: EncryptedStoredObject) => {
 
-    return setDoc(doc(userDataRef,key), {hash, data});
+  const validateEncryptedStoredObject = ajv.compile(encryptedStoredObjectSchema);
+  if (!validateEncryptedStoredObject(value)){
+    console.error(JSON.stringify(validateEncryptedStoredObject.errors))
+    throw new TypeError("Invalid value");
+  }
+  const ref = db.ref(userId);
+  const updates = {
+    [`metadata/${value.key.item}/${value.key.id}`]: {timestamp: value.timestamp ?? Date.now()},
+    [`data/${value.key.item}/${value.key.id}`]: value.data,
+  };
+  
+  return ref.update(updates);
+
 };
 
-export const dataIsChanged = async (userId: string, key: keyof StorageSchema, data: string) => {
-    const hash = crypto.createHash('sha256').update(data).digest('base64');
-    const snapshot = await get(ref(db, `${userId}/${key}/hash`));
-    return snapshot.val() !== hash;
-};
+const getMetadataSnapshot = (userId: string, oStorageKey: StorageKey) => {
+  const ref = db.ref(userId);
+  return ref.child(`metadata/${oStorageKey.item}/${oStorageKey.id}`).get();
+}
 
-export const getData = async (userId: string, keys: Array<keyof StorageSchema>) => {
+const getDataSnapshot = (userId: string, oStorageKey: StorageKey) => {
+  const ref = db.ref(userId);
+  return ref.child(`data/${oStorageKey.item}/${oStorageKey.id}`).get();
+}
 
 
-    const q = query(userDataRef, where("state", "==", "CA"));
+export const syncData  = async (userId: string, value: EncryptedStoredObject | StorageKey) => {
 
-    for (const key of keys) {
-      const snapshot = await get(ref(db, `${userId}/${key}/data`));
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        if (typeof data === 'string'){
-            results.push({ [key]: data });
-        }
+  let output: {value: EncryptedStoredObject, changed: boolean};
+  
+  if ((value as EncryptedStoredObject).data === undefined) {
+    const oStorageKey = value as StorageKey;
+    const validateStorageKey = ajv.compile(storageKeySchema);
+    if (!validateStorageKey(oStorageKey)){
+      console.error(JSON.stringify(validateStorageKey.errors));
+      throw new TypeError("Invalid value");
+    }
+    output = {value: {key: value as StorageKey, data: null, timestamp: null }, changed: true};
+    const metadataSnapshot = await getMetadataSnapshot(userId,oStorageKey);
+    const metadata = metadataSnapshot.val();
+    const storedTimestamp = metadata && metadata.timestamp ? metadata.timestamp : null;
+    if (storedTimestamp){
+      output.value.timestamp = storedTimestamp;
+      const dataSnapshot = await getDataSnapshot(userId,oStorageKey);
+      output.value.data = dataSnapshot.exists() ? dataSnapshot.val() : null;
+    }
+  }
+  else{
+    const oStorageObject = value as EncryptedStoredObject
+    const validateEncryptedStoredObject = ajv.compile(encryptedStoredObjectSchema);
+    if (!validateEncryptedStoredObject(oStorageObject)){
+      console.error(JSON.stringify(validateEncryptedStoredObject.errors));
+      throw new TypeError("Invalid value");
+    }
+    oStorageObject.timestamp = oStorageObject.timestamp ?? Date.now();
+    output = {value: oStorageObject, changed: false};
+
+    const metadataSnapshot = await getMetadataSnapshot(userId,oStorageObject.key);
+    const metadata = metadataSnapshot.val();
+    const storedTimestamp = metadata && metadata.timestamp ? metadata.timestamp : null;
+    if (typeof storedTimestamp !== 'number' || oStorageObject.timestamp > storedTimestamp){
+        await storeData(userId, oStorageObject);
+    }
+    else if (oStorageObject.timestamp !== storedTimestamp){
+      const dataSnapshot = await getDataSnapshot(userId,oStorageObject.key);
+      const storedData = dataSnapshot.val();
+      if (storedData === null || typeof storedData === 'string'){
+        output.changed = true;
+        oStorageObject.timestamp = storedTimestamp;
+        oStorageObject.data = storedData;
+      }
+      else{
+        await storeData(userId,oStorageObject);
       }
     }
-    return results;
-  };
+
+  }
+
+  return output;
+} 

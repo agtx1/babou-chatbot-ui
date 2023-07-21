@@ -1,17 +1,24 @@
-import { StorageSchema, RemoteStorageKeys } from "@/types/storage";
+import { StorageSchema, RemoteStorageItems } from "@/types/storage";
 
 class AppStorageClass {
     public getItem<K extends keyof StorageSchema>(key: K): string | null {
-        if (RemoteStorageKeys.includes(key)){
+
+      const localItem = localStorage.getItem(key);
+      let remoteItem = null;
+
+        if (key in RemoteStorageItems){
+
             //check for update
         }
-      return localStorage.getItem(key);
+      
+      return remoteItem ?? localItem;
+
     }
   
     public setItem<K extends keyof StorageSchema>(key: K, value: string): void {
       localStorage.setItem(key, value);
 
-      if (RemoteStorageKeys.includes(key)){
+      if (key in RemoteStorageItems){
         //store remotely with api
       }
     }
@@ -19,7 +26,7 @@ class AppStorageClass {
     public removeItem<K extends keyof StorageSchema>(key: K): void {
       localStorage.removeItem(key);
 
-      if (RemoteStorageKeys.includes(key)){
+      if (key in RemoteStorageItems){
         //delete remotely with API
       }
     }
