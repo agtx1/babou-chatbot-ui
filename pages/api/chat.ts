@@ -40,6 +40,9 @@ const handler = async (req: Request): Promise<Response> => {
       console.info("Using EPC API key");
       key = process.env.EPC_OPENAI_API_KEY;
     }
+    else{
+      console.info("Using default API key");
+    }
     
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
