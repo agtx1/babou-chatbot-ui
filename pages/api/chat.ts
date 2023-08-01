@@ -12,11 +12,35 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+import { getJwtPayload } from '@/utils/server/jwt';
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const { model, messages, prompt, key, temperature, compressionEnabled } = (await req.json()) as ChatBody;
-
+    let { model, messages, prompt, key, temperature, compressionEnabled } = (await req.json()) as ChatBody;
+    let jwtPayload;
+  
+    try{
+      const iapJwt = req.headers.get('x-goog-iap-jwt-assertion');
+      if (!iapJwt){
+        const error = new Error();
+        error.name = "Unauthorized";
+        throw error;
+      }
+      jwtPayload = await getJwtPayload(iapJwt);
+    }
+    catch(err : any){
+      if (err.name === "Unauthorized"){
+        return new Response('Error', { status: 401, statusText: "Unauthorized" });
+      }
+      else{
+        return new Response('Error', { status: 500, statusText: "Server error" });
+      }
+    }
+    if (!key && jwtPayload && jwtPayload.email && jwtPayload.email.toLowerCase().indexOf("@edelson.com") >-1 && process.env.EPC_OPENAI_API_KEY){
+      console.info("Using EPC API key");
+      key = process.env.EPC_OPENAI_API_KEY;
+    }
+    
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
       tiktokenModel.bpe_ranks,
