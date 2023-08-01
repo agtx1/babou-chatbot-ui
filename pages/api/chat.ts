@@ -19,7 +19,7 @@ const handler = async (req: Request): Promise<Response> => {
     let jwtPayload;
   
     try{
-      const jwtPayloadResp = await fetch(`http://localhost:3000/api/jwt`, {
+      const jwtPayloadResp = await fetch(`https://localhost:3000/api/jwt`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -38,6 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     }
     catch(err : any){
+      console.error(JSON.stringify(err));
       if (err.name === "Unauthorized"){
         return new Response('Error', { status: 401, statusText: "Unauthorized" });
       }
@@ -84,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
         try{
           // If total token count exceeds the limit, create an array of trimmed messages
           const trimmedMessages =    await Promise.all(messagesToProcess.map(async message => {
-                const response = await fetch(`http://localhost:3000/api/trim`, {
+                const response = await fetch(`https://localhost:3000/api/trim`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -127,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(stream);
   } catch (error) {
-    console.error(error);
+    console.error(JSON.stringify(error));
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {
