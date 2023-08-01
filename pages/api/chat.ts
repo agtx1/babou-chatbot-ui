@@ -1,7 +1,3 @@
-export const config = {
-  runtime: 'edge',
-};
-
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 

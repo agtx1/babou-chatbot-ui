@@ -1,6 +1,3 @@
-export const config = {
-  runtime: 'edge',
-};
 import { OAuth2Client } from 'google-auth-library';
 
 export const getJwtPayload = async (iapJwt: string) => {    
