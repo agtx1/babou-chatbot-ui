@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).send({ error: 'Method Not Allowed', method: req.method });
         return;
     }
-    const iapJwt = req.headers['x-goog-iap-jwt-assertion'];
+    const {iapJwt} = req.body;
     let jwtPayload = null;
     if (typeof iapJwt === 'string'){
         try{

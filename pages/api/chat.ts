@@ -18,6 +18,7 @@ const handler = async (req: Request): Promise<Response> => {
     let { model, messages, prompt, key, temperature, compressionEnabled } = (await req.json()) as ChatBody;
     let jwtPayload;
   
+    const iapJwt = req.headers.get('x-goog-iap-jwt-assertion');
     try{
       const jwtPayloadResp = await fetch(`https://localhost:3000/api/jwt`, {
         method: 'POST',
@@ -25,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
             'Content-Type': 'application/json'
         },
         credentials: 'include', // Include cookies
-        body: JSON.stringify({ })
+        body: JSON.stringify({ iapJwt: iapJwt })
       });
       const jwtPayloadJson = await jwtPayloadResp.json();      
       if (!jwtPayloadJson || !jwtPayloadJson.hasOwnProperty('jwtPayload')){
