@@ -1,3 +1,7 @@
+export const config = {
+  runtime: 'edge',
+};
+
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 
@@ -8,7 +12,6 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
-import { getJwtPayload } from '@/utils/server/jwt';
 
 const handler = async (req: Request): Promise<Response> => {
   try {
@@ -16,13 +19,23 @@ const handler = async (req: Request): Promise<Response> => {
     let jwtPayload;
   
     try{
-      const iapJwt = req.headers.get('x-goog-iap-jwt-assertion');
-      if (!iapJwt){
+      const jwtPayloadResp = await fetch(`http://localhost:3000/api/jwt`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include', // Include cookies
+        body: JSON.stringify({ })
+      });
+      const jwtPayloadJson = await jwtPayloadResp.json();      
+      if (!jwtPayloadJson || !jwtPayloadJson.hasOwnProperty('jwtPayload')){
         const error = new Error();
         error.name = "Unauthorized";
         throw error;
       }
-      jwtPayload = await getJwtPayload(iapJwt);
+
+      jwtPayload = jwtPayloadJson.jwtPayload;
+
     }
     catch(err : any){
       if (err.name === "Unauthorized"){
