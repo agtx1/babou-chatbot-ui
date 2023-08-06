@@ -12,12 +12,13 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+import { TokenPayload } from 'google-auth-library';
 
 const handler = async (req: Request): Promise<Response> => {
   try {
     let { model, messages, prompt, key, temperature, compressionEnabled } = (await req.json()) as ChatBody;
-    let jwtPayload;
-  
+    let jwtPayload: TokenPayload | null;
+    let email: string;
     const iapJwt = req.headers.get('x-goog-iap-jwt-assertion');
     try{
       const jwtPayloadResp = await fetch(`http://localhost:3000/api/jwt`, {
@@ -36,6 +37,14 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       jwtPayload = jwtPayloadJson.jwtPayload;
+      if (!jwtPayload){
+        const e = new Error;
+        e.name = "Unauthorized";
+        e.message = "JWT payload null";
+        throw e;
+      }
+
+      email = jwtPayload.email ? jwtPayload.email.toLowerCase() : '';
 
     }
     catch(err : any){
@@ -47,12 +56,12 @@ const handler = async (req: Request): Promise<Response> => {
         return new Response('Error', { status: 500, statusText: "Server error" });
       }
     }
-    if (!key && jwtPayload && jwtPayload.email && jwtPayload.email.toLowerCase().indexOf("@edelson.com") >-1 && process.env.EPC_OPENAI_API_KEY){
-      console.info("Using EPC API key");
+    if (!key && jwtPayload && email.indexOf("@edelson.com") >-1 && process.env.EPC_OPENAI_API_KEY){
+      console.info("Using EPC API key for " + email);
       key = process.env.EPC_OPENAI_API_KEY;
     }
     else{
-      console.info("Using default API key");
+      console.info("Using default API key for " + email);
     }
     
     await init((imports) => WebAssembly.instantiate(wasm, imports));
