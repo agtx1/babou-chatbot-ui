@@ -87,15 +87,9 @@ export const OpenAIStream = async (
   const stream = new ReadableStream({
     async start(controller) {
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
-        if (event.type === 'event') {
+        if (event.type === 'event' && event.data !== '[DONE]') {
           const data = event.data;
           try {
-            
-            if (data === '[DONE]'){
-              controller.close();
-              return;
-            }
-
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
               controller.close();
