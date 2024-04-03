@@ -11,10 +11,7 @@ const handler = async (req: Request): Promise<Response> => {
   const modelArray = [];
   for (const [key, value] of Object.entries(OpenAIModelID)) {
 
-      modelArray.push( {
-        id: OpenAIModels[value].id,
-        name: OpenAIModels[value].name,
-      });
+      modelArray.push(OpenAIModels[value]);
   }
   return new Response(JSON.stringify(modelArray), { status: 200 });
 
