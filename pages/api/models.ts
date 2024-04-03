@@ -7,6 +7,18 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+
+  const modelArray = [];
+  for (const [key, value] of Object.entries(OpenAIModelID)) {
+
+      modelArray.push( {
+        id: OpenAIModels[value].id,
+        name: OpenAIModels[value].name,
+      });
+  }
+  return new Response(JSON.stringify(modelArray), { status: 200 });
+
+  /*
   try {
     const { key } = (await req.json()) as {
       key: string;
@@ -67,6 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error(error);
     return new Response('Error', { status: 500 });
   }
+*/
 };
 
 export default handler;

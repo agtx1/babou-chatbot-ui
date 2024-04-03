@@ -10,9 +10,7 @@ export interface OpenAIModel {
 
 export enum OpenAIModelID {
   GPT_3_5 = 'gpt-3.5-turbo',
-  GPT_3_5_AZ = 'gpt-35-turbo',
   GPT_4 = 'gpt-4',
-  GPT_4_32K = 'gpt-4-32k',
   GPT_3_5_16K = 'gpt-3.5-turbo-16k',
   GPT_4_TURBO = 'gpt-4-0125-preview',
   CLAUDE = 'claude-3-opus-20240229'
@@ -34,13 +32,6 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     tokenLimit: 4000,
     provider: AIProviderID.OPENAI,
   },
-  [OpenAIModelID.GPT_3_5_AZ]: {
-    id: OpenAIModelID.GPT_3_5_AZ,
-    name: 'GPT-3.5',
-    maxLength: 12000,
-    tokenLimit: 4000,
-    provider: AIProviderID.OPENAI,
-  },
   [OpenAIModelID.GPT_3_5_16K]: {
     id: OpenAIModelID.GPT_3_5_16K,
     name: 'GPT-3.5-16K',
@@ -53,13 +44,6 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-4',
     maxLength: 24000,
     tokenLimit: 5000,
-    provider: AIProviderID.OPENAI,
-  },
-  [OpenAIModelID.GPT_4_32K]: {
-    id: OpenAIModelID.GPT_4_32K,
-    name: 'GPT-4-32K',
-    maxLength: 96000,
-    tokenLimit: 32000,
     provider: AIProviderID.OPENAI,
   },
   [OpenAIModelID.GPT_4_TURBO]: {
