@@ -22,3 +22,6 @@ export const AZURE_DEPLOYMENT_ID =
 
 export const ANTHROPIC_API_KEY = 
   process.env.ANTHROPIC_API_KEY || '';
+
+export const OPENAI_API_KEY = 
+process.env.OPENAI_API_KEY || '';

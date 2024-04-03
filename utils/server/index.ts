@@ -1,7 +1,7 @@
 import { Message, AIStreamRequest } from '@/types/chat';
 import { OpenAIModel, AIProviderID } from '@/types/openai';
 
-import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION, ANTHROPIC_API_KEY } from '../app/const';
+import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION, ANTHROPIC_API_KEY, OPENAI_API_KEY } from '../app/const';
 
 import {
   ParsedEvent,
@@ -145,7 +145,7 @@ const OpenAIStreamPromise = async  (
   const model = streamRequest.model;
   const systemPrompt = streamRequest.systemPrompt;
   const temperature = streamRequest.temperature;
-  const key = streamRequest.key;
+  const key = streamRequest.key ? streamRequest.key : OPENAI_API_KEY;
   const messages = streamRequest.messages;
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   if (OPENAI_API_TYPE === 'azure') {
