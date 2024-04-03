@@ -26,3 +26,11 @@ export interface Conversation {
   folderId: string | null;
   compressionEnabled: boolean;
 }
+
+export interface AIStreamRequest {
+  model: OpenAIModel,
+  systemPrompt: string,
+  temperature : number,
+  key: string,
+  messages: Message[],
+}

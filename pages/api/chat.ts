@@ -5,7 +5,7 @@ export const config = {
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 
-import { ChatBody, Message } from '@/types/chat';
+import { ChatBody, Message, AIStreamRequest } from '@/types/chat';
 
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
@@ -133,8 +133,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     encoding.free();
+    const streamRequest = {model: model,systemPrompt: promptToSend,temperature: temperatureToUse, key: key, messages: messagesToSend} as AIStreamRequest;
 
-    const stream = await OpenAIStream(model, promptToSend, temperatureToUse, key, messagesToSend);
+    const stream = await OpenAIStream(streamRequest);
 
     return new Response(stream);
   } catch (error) {
